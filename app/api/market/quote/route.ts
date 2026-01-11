@@ -1,0 +1,39 @@
+import { type NextRequest, NextResponse } from "next/server"
+
+const FMP_API_KEY = process.env.FMP_API_KEY
+const BASE_URL = "https://financialmodelingprep.com"
+
+export async function GET(request: NextRequest) {
+  const symbol = request.nextUrl.searchParams.get("symbol")
+
+  if (!symbol) {
+    return NextResponse.json([], { status: 200 })
+  }
+
+  if (!FMP_API_KEY) {
+    console.error("FMP_API_KEY not configured")
+    return NextResponse.json([], { status: 200 })
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/stable/quote?symbol=${symbol}&apikey=${FMP_API_KEY}`)
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      console.error(`Quote fetch failed (${res.status}):`, errorText)
+      return NextResponse.json([], { status: 200 })
+    }
+
+    const data = await res.json()
+
+    if (!Array.isArray(data)) {
+      console.error("Quote data is not an array:", data)
+      return NextResponse.json([], { status: 200 })
+    }
+
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error("Error fetching quote:", error)
+    return NextResponse.json([], { status: 200 })
+  }
+}
