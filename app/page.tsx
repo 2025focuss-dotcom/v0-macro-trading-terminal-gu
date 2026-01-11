@@ -25,11 +25,11 @@ export default function MacroCommandCenter() {
         </div>
 
         {/* Center - Chart & Scenario Playbook */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 relative">
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 relative min-h-[400px]">
             <ChartArea />
           </div>
-          <div className="h-72 border-t border-[#7d41ff]/20">
+          <div className="h-64 flex-shrink-0 border-t border-[#7d41ff]/20">
             <ScenarioPlaybook />
           </div>
         </div>

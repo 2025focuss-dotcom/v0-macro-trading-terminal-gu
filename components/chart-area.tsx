@@ -13,6 +13,20 @@ export function ChartArea() {
     // Clear any existing content
     containerRef.current.innerHTML = ""
 
+    // Create container div for widget
+    const widgetContainer = document.createElement("div")
+    widgetContainer.className = "tradingview-widget-container"
+    widgetContainer.style.height = "100%"
+    widgetContainer.style.width = "100%"
+    widgetContainer.style.position = "relative"
+
+    const widgetInner = document.createElement("div")
+    widgetInner.className = "tradingview-widget-container__widget"
+    widgetInner.style.height = "100%"
+    widgetInner.style.width = "100%"
+
+    widgetContainer.appendChild(widgetInner)
+
     // Create script element for TradingView widget
     const script = document.createElement("script")
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"
@@ -25,8 +39,8 @@ export function ChartArea() {
       timezone: "Etc/UTC",
       theme: "dark",
       style: "1",
-      locale: "en",
-      backgroundColor: "rgba(0, 0, 0, 0)",
+      locale: "es",
+      backgroundColor: "rgba(0, 0, 0, 1)",
       gridColor: "rgba(125, 65, 255, 0.1)",
       hide_top_toolbar: false,
       hide_legend: false,
@@ -35,32 +49,9 @@ export function ChartArea() {
       calendar: false,
       hide_volume: false,
       support_host: "https://www.tradingview.com",
-      studies: ["MASimple@tv-basicstudies", "RSI@tv-basicstudies"],
-      overrides: {
-        "paneProperties.background": "rgba(0,0,0,0)",
-        "paneProperties.backgroundType": "solid",
-        "scalesProperties.backgroundColor": "rgba(0,0,0,0)",
-        "mainSeriesProperties.candleStyle.upColor": "#0df2c9",
-        "mainSeriesProperties.candleStyle.downColor": "#ff2e5b",
-        "mainSeriesProperties.candleStyle.wickUpColor": "#0df2c9",
-        "mainSeriesProperties.candleStyle.wickDownColor": "#ff2e5b",
-        "mainSeriesProperties.candleStyle.borderUpColor": "#0df2c9",
-        "mainSeriesProperties.candleStyle.borderDownColor": "#ff2e5b",
-      },
+      studies: ["STD;SMA", "STD;RSI"],
     })
 
-    // Create container div for widget
-    const widgetContainer = document.createElement("div")
-    widgetContainer.className = "tradingview-widget-container"
-    widgetContainer.style.height = "100%"
-    widgetContainer.style.width = "100%"
-
-    const widgetInner = document.createElement("div")
-    widgetInner.className = "tradingview-widget-container__widget"
-    widgetInner.style.height = "calc(100% - 32px)"
-    widgetInner.style.width = "100%"
-
-    widgetContainer.appendChild(widgetInner)
     widgetContainer.appendChild(script)
     containerRef.current.appendChild(widgetContainer)
 
@@ -72,9 +63,9 @@ export function ChartArea() {
   }, [])
 
   return (
-    <div className="relative h-full glass overflow-hidden">
-      {/* TradingView Chart Container */}
-      <div ref={containerRef} className="absolute inset-0 z-0" />
+    <div className="relative h-full w-full glass overflow-hidden" style={{ minHeight: "400px" }}>
+      {/* TradingView Chart Container with explicit sizing */}
+      <div ref={containerRef} className="absolute inset-0 z-0" style={{ height: "100%", width: "100%" }} />
 
       {/* Institutional Liquidity Overlay Label */}
       <motion.div
@@ -96,7 +87,7 @@ export function ChartArea() {
         className="absolute bottom-[20%] right-[10%] z-10 pointer-events-none"
       >
         <div className="px-3 py-2 bg-[#0df2c9] glow-green">
-          <span className="font-sans text-xs font-black italic uppercase text-black">STRONG BUY ZONE</span>
+          <span className="font-sans text-xs font-black italic uppercase text-black">ZONA DE COMPRA FUERTE</span>
         </div>
         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[#0df2c9]" />
       </motion.div>

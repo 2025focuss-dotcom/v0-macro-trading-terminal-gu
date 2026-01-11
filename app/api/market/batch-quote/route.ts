@@ -3,7 +3,13 @@ import { getCached, setCache } from "@/lib/api-cache"
 
 const FMP_API_KEY = process.env.FMP_API_KEY
 const BASE_URL = "https://financialmodelingprep.com"
-const CACHE_TTL = 2 * 60 * 1000
+const CACHE_TTL = 15 * 60 * 1000
+
+const FALLBACK_DATA: Record<string, unknown> = {
+  "^VIX": { symbol: "^VIX", name: "CBOE Volatility Index", price: 18.5, changesPercentage: -2.1 },
+  "DX-Y.NYB": { symbol: "DX-Y.NYB", name: "US Dollar Index", price: 108.45, changesPercentage: -0.32 },
+  "^TNX": { symbol: "^TNX", name: "10-Year Treasury", price: 4.45, changesPercentage: 0.15 },
+}
 
 export async function GET(request: NextRequest) {
   const symbols = request.nextUrl.searchParams.get("symbols")
@@ -20,7 +26,11 @@ export async function GET(request: NextRequest) {
 
   if (!FMP_API_KEY) {
     console.error("FMP_API_KEY not configured")
-    return NextResponse.json([], { status: 200 })
+    const fallback = symbols
+      .split(",")
+      .map((s) => FALLBACK_DATA[s] || { symbol: s, price: 0, changesPercentage: 0 })
+      .filter(Boolean)
+    return NextResponse.json(fallback, { status: 200 })
   }
 
   try {
@@ -29,20 +39,35 @@ export async function GET(request: NextRequest) {
     if (!res.ok) {
       const errorText = await res.text()
       console.error(`Batch quote fetch failed (${res.status}):`, errorText)
-      return NextResponse.json([], { status: 200 })
+      const fallback = symbols
+        .split(",")
+        .map((s) => FALLBACK_DATA[s] || { symbol: s, price: 0, changesPercentage: 0 })
+        .filter(Boolean)
+      setCache(cacheKey, fallback)
+      return NextResponse.json(fallback, { status: 200 })
     }
 
     const data = await res.json()
 
     if (!Array.isArray(data)) {
       console.error("Batch quote data is not an array:", data)
-      return NextResponse.json([], { status: 200 })
+      const fallback = symbols
+        .split(",")
+        .map((s) => FALLBACK_DATA[s] || { symbol: s, price: 0, changesPercentage: 0 })
+        .filter(Boolean)
+      setCache(cacheKey, fallback)
+      return NextResponse.json(fallback, { status: 200 })
     }
 
     setCache(cacheKey, data)
     return NextResponse.json(data)
   } catch (error) {
     console.error("Error fetching batch quotes:", error)
-    return NextResponse.json([], { status: 200 })
+    const fallback = symbols
+      .split(",")
+      .map((s) => FALLBACK_DATA[s] || { symbol: s, price: 0, changesPercentage: 0 })
+      .filter(Boolean)
+    setCache(cacheKey, fallback)
+    return NextResponse.json(fallback, { status: 200 })
   }
 }

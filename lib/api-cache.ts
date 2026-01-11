@@ -32,3 +32,6 @@ export function setCache(key: string, data: unknown): void {
 export function clearCache(): void {
   cache.clear()
 }
+
+export const getFromCache = getCached
+export const setInCache = setCache

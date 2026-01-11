@@ -169,3 +169,17 @@ export function useMarketNews() {
     isError: error,
   }
 }
+
+export function useCryptoPanicNews(filter?: string) {
+  const url = filter ? `/api/market/cryptopanic?filter=${filter}` : `/api/market/cryptopanic`
+  const { data, error, isLoading, mutate } = useSWR(url, fetcher, {
+    refreshInterval: 180000, // 3 minutes
+  })
+
+  return {
+    news: data?.results || [],
+    isLoading,
+    isError: error,
+    mutate,
+  }
+}
