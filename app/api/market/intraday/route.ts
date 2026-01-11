@@ -1,7 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { getCached, setCache } from "@/lib/api-cache"
 
 const FMP_API_KEY = process.env.FMP_API_KEY
 const BASE_URL = "https://financialmodelingprep.com"
+const CACHE_TTL = 2 * 60 * 1000
 
 export async function GET(request: NextRequest) {
   const symbol = request.nextUrl.searchParams.get("symbol")
@@ -9,6 +11,12 @@ export async function GET(request: NextRequest) {
 
   if (!symbol) {
     return NextResponse.json([], { status: 200 })
+  }
+
+  const cacheKey = `intraday:${symbol}:${interval}`
+  const cached = getCached<unknown[]>(cacheKey, CACHE_TTL)
+  if (cached) {
+    return NextResponse.json(cached)
   }
 
   if (!FMP_API_KEY) {
@@ -32,6 +40,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([], { status: 200 })
     }
 
+    setCache(cacheKey, data)
     return NextResponse.json(data)
   } catch (error) {
     console.error("Error fetching intraday chart:", error)

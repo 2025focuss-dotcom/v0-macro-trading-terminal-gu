@@ -6,7 +6,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export function useQuote(symbol: string) {
   const { data, error, isLoading, mutate } = useSWR(symbol ? `/api/market/quote?symbol=${symbol}` : null, fetcher, {
-    refreshInterval: 10000,
+    refreshInterval: 120000,
   })
 
   return {
@@ -22,7 +22,7 @@ export function useBatchQuotes(symbols: string[]) {
   const { data, error, isLoading, mutate } = useSWR(
     symbols.length > 0 ? `/api/market/batch-quote?symbols=${symbolList}` : null,
     fetcher,
-    { refreshInterval: 10000 },
+    { refreshInterval: 120000 },
   )
 
   return {
@@ -51,7 +51,7 @@ export function useIntradayChart(symbol: string, interval: "1min" | "5min" | "15
   const { data, error, isLoading } = useSWR(
     symbol ? `/api/market/intraday?symbol=${symbol}&interval=${interval}` : null,
     fetcher,
-    { refreshInterval: 30000 },
+    { refreshInterval: 120000 },
   )
 
   return {
@@ -63,7 +63,7 @@ export function useIntradayChart(symbol: string, interval: "1min" | "5min" | "15
 
 export function useForexQuotes() {
   const { data, error, isLoading } = useSWR(`/api/market/forex`, fetcher, {
-    refreshInterval: 10000,
+    refreshInterval: 120000,
   })
 
   return {
@@ -75,7 +75,7 @@ export function useForexQuotes() {
 
 export function useIndexQuotes() {
   const { data, error, isLoading } = useSWR(`/api/market/indexes`, fetcher, {
-    refreshInterval: 10000,
+    refreshInterval: 120000,
   })
 
   return {
@@ -86,7 +86,9 @@ export function useIndexQuotes() {
 }
 
 export function useCommodityQuotes() {
-  const { data, error, isLoading } = useSWR(`/api/market/commodities`, fetcher, { refreshInterval: 10000 })
+  const { data, error, isLoading } = useSWR(`/api/market/commodities`, fetcher, {
+    refreshInterval: 120000,
+  })
 
   return {
     commodities: data || [],
@@ -97,7 +99,7 @@ export function useCommodityQuotes() {
 
 export function useFearGreedIndex() {
   const { data, error, isLoading } = useSWR(`/api/market/fear-greed`, fetcher, {
-    refreshInterval: 60000,
+    refreshInterval: 300000,
   })
 
   return {
@@ -109,7 +111,7 @@ export function useFearGreedIndex() {
 
 export function useSectorPerformance() {
   const { data, error, isLoading } = useSWR(`/api/market/sectors`, fetcher, {
-    refreshInterval: 60000,
+    refreshInterval: 300000,
   })
 
   return {
@@ -120,7 +122,9 @@ export function useSectorPerformance() {
 }
 
 export function useMarketMovers() {
-  const { data, error, isLoading } = useSWR(`/api/market/movers`, fetcher, { refreshInterval: 30000 })
+  const { data, error, isLoading } = useSWR(`/api/market/movers`, fetcher, {
+    refreshInterval: 300000,
+  })
 
   return {
     gainers: data?.gainers || [],
@@ -132,7 +136,7 @@ export function useMarketMovers() {
 
 export function useTreasuryRates() {
   const { data, error, isLoading } = useSWR(`/api/market/treasury`, fetcher, {
-    refreshInterval: 60000,
+    refreshInterval: 600000,
   })
 
   return {
@@ -143,12 +147,24 @@ export function useTreasuryRates() {
 }
 
 export function useEconomicCalendar() {
-  const { data, error, isLoading } = useSWR(`/api/market/economic-calendar`, fetcher, {
-    refreshInterval: 300000,
+  const { data, error, isLoading } = useSWR(`/api/market/calendar`, fetcher, {
+    refreshInterval: 600000,
   })
 
   return {
     events: data || [],
+    isLoading,
+    isError: error,
+  }
+}
+
+export function useMarketNews() {
+  const { data, error, isLoading } = useSWR(`/api/market/news`, fetcher, {
+    refreshInterval: 300000,
+  })
+
+  return {
+    news: data || [],
     isLoading,
     isError: error,
   }

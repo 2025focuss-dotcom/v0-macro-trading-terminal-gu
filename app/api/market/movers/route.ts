@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server"
+import { getCached, setCache } from "@/lib/api-cache"
 
 const FMP_API_KEY = process.env.FMP_API_KEY
 const BASE_URL = "https://financialmodelingprep.com"
+const CACHE_TTL = 5 * 60 * 1000
 
 export async function GET() {
+  const cacheKey = "movers"
+  const cached = getCached<{ gainers: unknown[]; losers: unknown[] }>(cacheKey, CACHE_TTL)
+  if (cached) {
+    return NextResponse.json(cached)
+  }
+
   if (!FMP_API_KEY) {
     console.error("FMP_API_KEY not configured")
     return NextResponse.json({ gainers: [], losers: [] }, { status: 200 })
@@ -15,8 +23,8 @@ export async function GET() {
       fetch(`${BASE_URL}/stable/losers?apikey=${FMP_API_KEY}`),
     ])
 
-    let gainers: any[] = []
-    let losers: any[] = []
+    let gainers: unknown[] = []
+    let losers: unknown[] = []
 
     if (gainersRes.ok) {
       const gainersData = await gainersRes.json()
@@ -36,7 +44,9 @@ export async function GET() {
       console.error(`Losers fetch failed (${losersRes.status})`)
     }
 
-    return NextResponse.json({ gainers, losers })
+    const result = { gainers, losers }
+    setCache(cacheKey, result)
+    return NextResponse.json(result)
   } catch (error) {
     console.error("Error fetching market movers:", error)
     return NextResponse.json({ gainers: [], losers: [] }, { status: 200 })
